@@ -1,3 +1,4 @@
+import { InjectionToken } from '@angular/core';
 /**
  * @license
  * Copyright Google LLC All Rights Reserved.
@@ -41,10 +42,25 @@ import {
   mixinColor,
   mixinDisableRipple,
   mixinTabIndex,
+  ThemePalette,
 } from '@angular/material/core';
 import {ANIMATION_MODULE_TYPE} from '@angular/platform-browser/animations';
 
 
+export interface MatRadioDefaultOptions {
+  color: ThemePalette;
+}
+
+export const MAT_RADIO_DEFAULT_OPTIONS = new InjectionToken<MatRadioDefaultOptions>('mat-radio-default-options', {
+  providedIn: 'root',
+  factory: MAT_RADIO_DEFAULT_OPTIONS_FACTORY
+});
+
+export function MAT_RADIO_DEFAULT_OPTIONS_FACTORY(): MatRadioDefaultOptions {
+  return {
+    color: 'accent'
+  }
+}
 // Increasing integer for generating unique ids for radio components.
 let nextUniqueId = 0;
 
@@ -462,6 +478,7 @@ export class MatRadioButton extends _MatRadioButtonMixinBase
               private _changeDetector: ChangeDetectorRef,
               private _focusMonitor: FocusMonitor,
               private _radioDispatcher: UniqueSelectionDispatcher,
+              @Optional() @Inject(MAT_RADIO_DEFAULT_OPTIONS) private _providerOverride?: MatRadioDefaultOptions,
               @Optional() @Inject(ANIMATION_MODULE_TYPE) public _animationMode?: string) {
     super(elementRef);
 
@@ -494,6 +511,9 @@ export class MatRadioButton extends _MatRadioButtonMixinBase
   }
 
   ngOnInit() {
+    if (this._providerOverride && this._providerOverride.color) {
+      this.color = this._providerOverride.color;
+    }
     if (this.radioGroup) {
       // If the radio is inside a radio group, determine if it should be checked
       this.checked = this.radioGroup.value === this._value;
